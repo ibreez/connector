@@ -1,0 +1,177 @@
+{
+  "entities": {
+    "BmlAccount": {
+      "title": "BmlAccount",
+      "description": "Represents a connected BML business bank account for the restaurant.",
+      "type": "object",
+      "properties": {
+        "bank": {
+          "type": "string",
+          "description": "Bank identifier, always BML"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the account"
+        },
+        "maskedAccountNumber": {
+          "type": "string",
+          "description": "Masked account number for privacy and identification"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Account currency (e.g., MVR or USD)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["CONNECTED", "REAUTH_REQUIRED", "DISCONNECTED", "SYNCING", "ERROR"],
+          "description": "Current connection status"
+        },
+        "balance": {
+          "type": "number",
+          "description": "Current available balance if provided"
+        },
+        "lastSuccessfulSync": {
+          "type": "string",
+          "description": "ISO timestamp of last successful transaction synchronization"
+        },
+        "lastTransactionCheck": {
+          "type": "string",
+          "description": "ISO timestamp of last transaction polling attempt"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last updated timestamp"
+        }
+      },
+      "required": ["bank", "displayName", "maskedAccountNumber", "currency", "status"]
+    },
+    "BmlTransaction": {
+      "title": "BmlTransaction",
+      "description": "A financial transaction retrieved from BML account history.",
+      "type": "object",
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "description": "Target BML account ID"
+        },
+        "bank": {
+          "type": "string",
+          "description": "Bank identifier, always BML"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Transaction amount"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency of transaction (MVR, USD)"
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["CREDIT", "DEBIT"],
+          "description": "Credit (incoming) or Debit (outgoing)"
+        },
+        "transactionType": {
+          "type": "string",
+          "description": "Classified transaction category"
+        },
+        "sender": {
+          "type": "string",
+          "description": "Sender name if extracted from description or transfer details"
+        },
+        "description": {
+          "type": "string",
+          "description": "Raw description text from BML statement"
+        },
+        "reference": {
+          "type": "string",
+          "description": "BML reference or slip confirmation number"
+        },
+        "transactionDate": {
+          "type": "string",
+          "description": "Transaction occurrence date/time"
+        },
+        "receivedAt": {
+          "type": "string",
+          "description": "ISO timestamp when ingested by the monitoring connector"
+        },
+        "fingerprint": {
+          "type": "string",
+          "description": "Deterministic deduplication fingerprint"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["NEW", "CLAIMED", "ARCHIVED"],
+          "description": "Claim status in restaurant system"
+        },
+        "claimed": {
+          "type": "boolean",
+          "description": "Whether payment has been claimed by staff for a guest bill"
+        },
+        "claimedBy": {
+          "type": "string",
+          "description": "Staff identifier or email who claimed payment"
+        },
+        "claimedAt": {
+          "type": "string",
+          "description": "ISO timestamp when claimed"
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Associated restaurant table or order number"
+        },
+        "isIncomingTransfer": {
+          "type": "boolean",
+          "description": "True if confirmed as customer bank transfer by the classifier"
+        },
+        "classificationReason": {
+          "type": "string",
+          "description": "Explanation for why transaction was classified as incoming transfer or other"
+        }
+      },
+      "required": ["accountId", "bank", "amount", "currency", "direction", "fingerprint", "status", "claimed"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Security audit record for connection events and user claims without storing credentials.",
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "description": "Event name"
+        },
+        "details": {
+          "type": "string",
+          "description": "Sanitized description of the event"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp of event"
+        },
+        "staffId": {
+          "type": "string",
+          "description": "User identifier who performed action"
+        }
+      },
+      "required": ["event", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/bmlAccounts/{accountId}": {
+      "schema": "BmlAccount",
+      "description": "Collection of connected BML business accounts."
+    },
+    "/transactions/{transactionId}": {
+      "schema": "BmlTransaction",
+      "description": "Collection of deduplicated, classified transactions."
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Security and activity audit logs."
+    }
+  }
+}

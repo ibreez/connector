@@ -1,0 +1,6 @@
+{
+  "name": "BML Transaction Connector",
+  "description": "Private, internal-use-only read-only BML transaction monitoring connector and incoming transfer dashboard for restaurant operations in the Maldives.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
